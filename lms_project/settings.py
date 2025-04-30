@@ -141,6 +141,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+CSRF_TRUSTED_ORIGINS = ['https://*.up.railway.app']
+
 
 
 # Default primary key field type
