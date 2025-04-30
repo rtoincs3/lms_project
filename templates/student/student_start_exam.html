@@ -1,0 +1,300 @@
+{% extends 'student_base.html' %}
+{% block content %}
+<div class="page-wrapper">
+    <div class="page-breadcrumb">
+        <div class="row">
+            <div class="col-5 align-self-center">
+                <h4 class="page-title">Exam</h4>
+            </div>
+            <div class="col-7 align-self-center">
+                <div class="d-flex align-items-center justify-content-end">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="#">Home</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Exam</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ exam.title }}</h3>
+                        <p class="card-text">{{ exam.description }}</p>
+                        <p class="card-text">Exam Duration: {{ exam.duration_miniutes }} minutes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <form method="POST" id="examForm">
+            {% csrf_token %}
+            <div class="row">
+                {% for question in questions %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card card-body h-100" style="box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;">
+                            <h4 class="card-title">Question {{ forloop.counter }}</h4>
+                            <div class="form-group">
+                                <label>Question Description</label>
+                                <textarea name="q_text_{{ question.id }}" class="form-control" rows="3" disabled>{{ question.text }}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Question Marks</label>
+                                <input type="number" name="q_marks_{{ question.id }}" class="form-control" value="{{ question.marks }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Options</label>
+                                {% for option in question.Options.all %}
+                                    <div class="d-flex align-items-center mb-2">
+                                        <input type="radio" name="q_correct_{{ question.id }}" value="{{ option.id }}" class="me-2">
+                                        <input type="text" class="form-control ml-2" value="{{ option.text }}" disabled>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+    
+            <div class="row">
+                <div class="col-12 text-center">
+                    <button type="submit" class="btn btn-success mt-3 btn-lg">Submit Exam</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+// Initialize variables
+let examDurationMinutes = {{ exam.duration_miniutes }}; // Exam duration in minutes
+
+// Check if we have a stored end time in localStorage
+let examEndTime;
+const storedEndTime = localStorage.getItem('examEndTime_{{ exam.id }}');
+
+if (storedEndTime) {
+    // If we have a stored end time, use it
+    examEndTime = parseInt(storedEndTime);
+} else {
+    // If no stored end time, calculate and store a new one
+    examEndTime = new Date().getTime() + (examDurationMinutes * 60 * 1000);
+    localStorage.setItem('examEndTime_{{ exam.id }}', examEndTime);
+}
+
+// Create fixed position countdown element
+function createFixedCountdownElement() {
+    // Create the fixed timer container if it doesn't exist
+    if (!document.getElementById("fixed-timer")) {
+        const timerContainer = document.createElement("div");
+        timerContainer.id = "fixed-timer";
+        timerContainer.style.position = "fixed";
+        timerContainer.style.bottom = "20px";
+        timerContainer.style.right = "20px";
+        timerContainer.style.backgroundColor = "#333333"; // Dark gray/blackish background
+        timerContainer.style.border = "none"; // No border
+        timerContainer.style.borderRadius = "5px";
+        timerContainer.style.padding = "10px 15px";
+        timerContainer.style.boxShadow = "0 4px 8px rgba(0,0,0,0.3)";
+        timerContainer.style.zIndex = "9999";
+        timerContainer.style.fontSize = "18px";
+        timerContainer.style.fontWeight = "bold";
+        timerContainer.style.color = "#ffffff"; // White text
+        
+        // Create the label directly as text
+        timerContainer.textContent = 'Time Remaining: ';
+        
+        // Create the countdown display and append it to the container
+        const countdownDisplay = document.createElement("span");
+        countdownDisplay.id = "fixed-countdown-display"; // Give it a unique ID
+        countdownDisplay.style.color = "#ffffff"; // White text
+        timerContainer.appendChild(countdownDisplay); // Append to the container
+        
+        // Add to document body
+        document.body.appendChild(timerContainer);
+    }
+}
+
+// Start countdown timer based on the remaining time
+function startCountdown() {
+    const countdownEl = document.getElementById("fixed-countdown-display"); // Use the unique ID
+    
+    // Initial update to ensure the countdown appears immediately
+    updateCountdown();
+    
+    // Set interval for continuous updates
+    const timer = setInterval(updateCountdown, 1000); // Update every second
+    
+    function updateCountdown() {
+        let now = new Date().getTime(); // Current time
+        let remainingTime = examEndTime - now; // Remaining time in milliseconds
+
+        if (remainingTime <= 0) {
+            clearInterval(timer); // Stop the timer
+            countdownEl.textContent = "Time's up!"; // Display time's up message
+            
+            // Change the background color to indicate time's up
+            document.getElementById("fixed-timer").style.backgroundColor = "#662222"; // Dark red for time's up
+            
+            // Clear the stored end time
+            localStorage.removeItem('examEndTime_{{ exam.id }}');
+            
+            // Show a message before submitting
+            setTimeout(() => {
+                countdownEl.textContent = "Submitting...";
+                // Submit the form after a brief delay
+                setTimeout(() => {
+                    document.getElementById("examForm").submit();
+                }, 1000);
+            }, 1000);
+        } else {
+            // Format the time remaining
+            let minutes = Math.floor(remainingTime / (1000 * 60));
+            let seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+            
+            // Add leading zeros for better readability
+            minutes = String(minutes).padStart(2, "0");
+            seconds = String(seconds).padStart(2, "0");
+            
+            // Set the text explicitly
+            countdownEl.textContent = `${minutes}:${seconds}`;
+            
+            
+            
+            // Change style if less than 1 minute remaining
+            if (remainingTime < 60000) {
+                countdownEl.style.color = "#ff6666"; // Lighter red for emphasis but still visible on dark background
+                // Make it blink in the last minute
+                countdownEl.style.animation = "blink 1s infinite";
+                // Add the blink animation if not already added
+                if (!document.getElementById("blink-animation")) {
+                    const style = document.createElement("style");
+                    style.id = "blink-animation";
+                    style.textContent = `
+                        @keyframes blink {
+                            0% { opacity: 1; }
+                            50% { opacity: 0.5; }
+                            100% { opacity: 1; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+        }
+    }
+}
+
+// Handle form submission and prevent manual submission after time is up
+document.getElementById("examForm").addEventListener("submit", function(event) {
+    if (new Date().getTime() > examEndTime) {
+        alert("Time's up! The exam will be automatically submitted.");
+    }
+    
+    // Clear the stored end time on successful submission
+    localStorage.removeItem('examEndTime_{{ exam.id }}');
+});
+
+// When the page loads, initialize the exam timer and start the countdown
+window.onload = function() {
+    createFixedCountdownElement(); // Create the fixed position countdown element
+    startCountdown(); // Start countdown when page loads
+    
+    // Log to console for debugging
+    console.log("Timer initialized. End time:", new Date(examEndTime).toLocaleTimeString());
+};
+
+// Add this code to your existing JavaScript
+
+// Initialize variables to track visibility changes
+let tabSwitchCount = 0;
+const maxAllowedSwitches = 2; // Allow 3 switches before warning
+let isHidden = false;
+
+// Function to handle visibility change
+function handleVisibilityChange() {
+    if (document.hidden) {
+        // Page is now hidden (user switched tabs or minimized window)
+        isHidden = true;
+        tabSwitchCount++;
+        
+        // Log the tab switch
+        console.log(`Tab switch detected (${tabSwitchCount}/${maxAllowedSwitches})`);
+        
+        // Create or update warning
+        showTabSwitchWarning();
+        
+        // Take action based on number of switches
+        if (tabSwitchCount > maxAllowedSwitches) {
+            // Auto-submit after too many switches
+            localStorage.setItem('exam_auto_submitted', 'true');
+            alert("Multiple tab switches detected. Your exam will be submitted.");
+            document.getElementById("examForm").submit();
+        }
+    } else {
+        // Page is now visible again
+        isHidden = false;
+    }
+}
+
+// Function to display a warning
+function showTabSwitchWarning() {
+    // Create warning if it doesn't exist
+    if (!document.getElementById("tab-switch-warning")) {
+        const warningDiv = document.createElement("div");
+        warningDiv.id = "tab-switch-warning";
+        warningDiv.style.position = "fixed";
+        warningDiv.style.top = "20px";
+        warningDiv.style.left = "50%";
+        warningDiv.style.transform = "translateX(-50%)";
+        warningDiv.style.backgroundColor = "#ff4444";
+        warningDiv.style.color = "white";
+        warningDiv.style.padding = "10px 20px";
+        warningDiv.style.borderRadius = "5px";
+        warningDiv.style.boxShadow = "0 2px 10px rgba(0,0,0,0.2)";
+        warningDiv.style.zIndex = "10000";
+        warningDiv.style.textAlign = "center";
+        warningDiv.style.fontWeight = "bold";
+        
+        document.body.appendChild(warningDiv);
+    }
+    
+    // Update warning message
+    const warning = document.getElementById("tab-switch-warning");
+    warning.textContent = `Warning: Tab switch detected (${tabSwitchCount}/${maxAllowedSwitches}). Your exam may be auto-submitted.`;
+    
+    // Make it fade out after 5 seconds
+    warning.style.opacity = "1";
+    warning.style.transition = "opacity 1s ease-in-out";
+    
+    setTimeout(() => {
+        warning.style.opacity = "0";
+    }, 5000);
+}
+
+// Register the visibility change event
+document.addEventListener("visibilitychange", handleVisibilityChange);
+
+// Check if the exam was auto-submitted on previous visit
+window.addEventListener("load", function() {
+    // Check if the exam was auto-submitted due to tab switch
+    if (localStorage.getItem('exam_auto_submitted') === 'true') {
+        alert("Your Previous exam was auto-submitted due to tab switching.");
+        
+        // Remove the flag after showing the alert so it doesn't show again
+        localStorage.removeItem('exam_auto_submitted');
+    }
+});
+</script>
+
+    
+    
+
+{% endblock %}

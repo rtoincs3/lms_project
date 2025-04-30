@@ -1,0 +1,102 @@
+{% extends 'faculty/teacher_base.html' %}
+{% block content %}
+<div class="page-wrapper">
+    <!-- ============================================================== -->
+    <!-- Bread crumb and right sidebar toggle -->
+    <!-- ============================================================== -->
+    <div class="page-breadcrumb">
+        <div class="row">
+            <div class="col-5 align-self-center">
+                <h4 class="page-title">Manage Materials</h4>
+            </div>
+            <div class="col-7 align-self-center">
+                <div class="d-flex align-items-center justify-content-end">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="#">Home</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Upload Material</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-2" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+    <div class="container-fluid">
+        <!-- row -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Material Create Form</h4>
+                        <form class="m-t-30" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label>Material Title</label>
+                                <input type="text" name="material_title" class="form-control" aria-describedby="Material"
+                                    placeholder="Material Title">
+                            </div>
+                            <div class="form-group">
+                                <label>Material</label>
+                                <input type="file" name="material_file" class="form-control" >
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- row -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Materials</h4>
+                        <div class="table-responsive">
+                            <table class="table">
+                                
+                                <thead class="bg-info text-white">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Material Title</th>
+                                        <th>By</th>
+                                         <th>Upload </th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for material in materials %}
+                                    <tr>
+                                        <td>{{ material.id }}</td>
+                                        <td>{{ material.title }}</td>
+                                        <td>{{ material.teacher.full_name }} - {{material.teacher.teacher_roleww}}</td>
+                                        <td>{{material.upload_at}}</td>
+                                        <td><a href="{% url 'delete_material' material.id %}"><i class="fas fa-trash text-danger ml-3" style="font-size: 17px;"></i></a></td>
+                                    </tr>
+                                {% endfor %}
+
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        <!-- row -->
+        
+    </div>
+
+</div>
+{% endblock %}

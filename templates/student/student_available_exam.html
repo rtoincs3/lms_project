@@ -1,0 +1,94 @@
+{% extends 'student_base.html' %}
+{% block content %}
+<div class="page-wrapper">
+    <!-- ============================================================== -->
+    <!-- Bread crumb and right sidebar toggle -->
+    <!-- ============================================================== -->
+    <div class="page-breadcrumb">
+        <div class="row">
+            <div class="col-5 align-self-center">
+                <h4 class="page-title">Available Exams</h4>
+            </div>
+            <div class="col-7 align-self-center">
+                <div class="d-flex align-items-center justify-content-end">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="#">Home</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Available Exam</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-2" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+
+    <div class="container-fluid">
+        <!-- row -->
+        <div class="row">
+
+            {% for exam in exams %}
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ exam.title }}</h3>
+                        <p class="card-text">{{ exam.description }}</p>
+                        <p class="card-text">{{ exam.start_time }} - To - {{ exam.end_time }}</p>
+                        <p class="card-text">Minutes: {{ exam.duration_miniutes }}</p>
+                        <p class="card-text">Total Marks: {{ exam.total_marks }}</p>
+                        
+                        <button type="button"
+                            class="btn {% cycle 'btn-success' 'btn-primary' 'btn-danger' 'btn-info' %}"
+                            data-toggle="modal" data-target="#examStartModal{{ exam.id }}">
+                            Start Exam
+                        </button>
+                        <!-- Bootstrap Modal -->
+<div class="modal fade" id="examStartModal{{ exam.id }}" tabindex="-1" role="dialog" aria-labelledby="examStartModalLabel{{ exam.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+  
+        <div class="modal-header">
+          <h5 class="modal-title" id="examStartModalLabel{{ exam.id }}">Exam Instructions</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+  
+        <div class="modal-body">
+          <ul>
+            <li>🚫 Copy/Paste is disabled.</li>
+            <li>🚫 You are not allowed to switch tabs or minimize.</li>
+            <li>⏰ Exam Duration: <strong>{{ exam.duration_miniutes }} minutes</strong>.</li>
+          </ul>
+          <p>Please ensure you're ready before starting.</p>
+        </div>
+  
+        <div class="modal-footer">
+          <a href="{% url 'start_exam' exam.id %}" class="btn btn-success">Start Now</a>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+  
+      </div>
+    </div>
+  </div>
+  
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'faculty/teacher_base.html' %}
+{% block content %}
+<div class="page-wrapper">
+    <!-- ============================================================== -->
+    <!-- Bread crumb and right sidebar toggle -->
+    <!-- ============================================================== -->
+    <div class="page-breadcrumb">
+        <div class="row">
+            <div class="col-5 align-self-center">
+                <h4 class="page-title">Form Inputs</h4>
+            </div>
+            <div class="col-7 align-self-center">
+                <div class="d-flex align-items-center justify-content-end">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="#">Home</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Create Exam</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- row -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Exam Create Form</h4>
+                        <form class="m-t-30" method="POST">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="examTitle">Exam Title</label>
+                                <input type="text" name="title" class="form-control" id="examTitle" aria-describedby="emailHelp"
+                                    placeholder="Enter Exam Title">
+                            </div>
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <textarea name="description" class="form-control" rows="3"
+                                    placeholder="Write short description"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="semester">Semester</label>
+                                <input type="text" name="semester" class="form-control" id="semester" aria-describedby="emailHelp"
+                                    placeholder="Exam Description">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label>Start Time</label>
+                                <input type="datetime-local" name="start_time" class="form-control" required>
+                            </div>
+                        
+                            <div class="form-group mb-3">
+                                <label>End Time</label>
+                                <input type="datetime-local" name="end_time" class="form-control" required>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label>Duration (Minutes)</label>
+                                <input type="number" name="duration_minutes" class="form-control" required min="1">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

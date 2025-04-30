@@ -1,0 +1,20 @@
+{% extends 'faculty/teacher_base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h3>Select Semester to View Attendance</h3>
+    <div class="row">
+        {% for sem in semesters %}
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5>Semester {{ sem }}</h5>
+                    <a href="{% url 'show_attendance' sem %}" class="btn btn-primary">View Attendance</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No semesters found.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends 'faculty/teacher_base.html' %}
+{% block content %}
+<div class="page-wrapper">
+    <!-- ============================================================== -->
+    <!-- Bread crumb and right sidebar toggle -->
+    <!-- ============================================================== -->
+    <div class="page-breadcrumb">
+        <div class="row">
+            <div class="col-5 align-self-center">
+                <h4 class="page-title">Time Table</h4>
+            </div>
+            <div class="col-7 align-self-center">
+                <div class="d-flex align-items-center justify-content-end">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="#">Home</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Time Table</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-2" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+
+
+    <div class="container-fluid">
+
+        <!-- row -->
+        <div class="row">
+            <div class="col-12">
+
+                {% regroup time_table by day as day_list %}
+
+                {% for day in day_list %}
+                <div class="card" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+                    <div class="card-body">
+                        <h4 class="card-title">{{ day.grouper }}</h4>
+                        <div class="table-responsive">
+                            <table class="table">
+
+                                <thead class="{% cycle 'bg-success' 'bg-primary' 'bg-danger' 'bg-info' %} text-white">
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Teacher</th>
+                                        <th>Semester</th>
+                                        <th>Start Time</th>
+                                        <th>End Time</th>
+                                        <th>Attendance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for lecture in day.list %}
+                                    <tr>
+                                        <td>{{ lecture.subject_name }}</td>
+                                        <td>{{ lecture.teacher.full_name }}</td>
+                                        <td>{{ lecture.semester }}</td>
+                                        <td>{{ lecture.start_time|time:"h:i A" }}</td>
+                                        <td>{{ lecture.end_time|time:"h:i A" }}</td>
+                                     
+                                        <td><a href="{% url 'take_attendance' lecture.id %}"
+                                                class="text-white btn btn-secondary">
+                                            Take Attendance
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+        <!-- row -->
+
+    </div>
+
+</div>
+{% endblock %}

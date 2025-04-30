@@ -1,0 +1,50 @@
+{% extends 'faculty/teacher_base.html' %}
+{% block content %}
+<div class="page-wrapper">
+    <!-- ============================================================== -->
+    <!-- Bread crumb and right sidebar toggle -->
+    <!-- ============================================================== -->
+    <div class="page-breadcrumb">
+        <div class="row">
+            <div class="col-5 align-self-center">
+                <h4 class="page-title">Form Inputs</h4>
+            </div>
+            <div class="col-7 align-self-center">
+                <div class="d-flex align-items-center justify-content-end">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="#">Home</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Create Exam</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- row -->
+        <div class="row">
+            <div class="col-12 m-t-30">
+                <h4 class="m-b-0">Size Using grid markup</h4>
+                <p class="text-muted m-t-0 font-12">Using the grid, wrap cards in columns and rows as needed.<code>.col-1 to .col-12</code></p>
+            </div>
+            {% for exam in exams %}
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ exam.title }}</h3>
+                        <p class="card-text">{{ exam.description }}</p>
+                        <a href="{% url 'update_exam' exam.id %}" class="btn {% cycle 'btn-success' 'btn-primary' 'btn-danger' 'btn-info' %}">Manage Exam</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+           
+        </div>
+    </div>
+
+</div>
+{% endblock %}

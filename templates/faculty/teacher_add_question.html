@@ -1,0 +1,85 @@
+{% extends 'faculty/teacher_base.html' %}
+{% block content %}
+<div class="page-wrapper">
+    <!-- ============================================================== -->
+    <!-- Bread crumb and right sidebar toggle -->
+    <!-- ============================================================== -->
+    <div class="page-breadcrumb">
+        <div class="row">
+            <div class="col-5 align-self-center">
+                <h4 class="page-title">Form Inputs</h4>
+            </div>
+            <div class="col-7 align-self-center">
+                <div class="d-flex align-items-center justify-content-end">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="#">Home</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Create Exam</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- row -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+
+                        <!-- Form to add a new question -->
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="question_text">Question Text</label>
+                                <textarea class="form-control" id="question_text" name="question_text" rows="4"
+                                    required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="marks">Marks</label>
+                                <input type="number" class="form-control" id="marks" name="marks" required>
+                            </div>
+
+                            <h4>Options</h4>
+                            <div id="options-container">
+                                <div class="form-group">
+                                    <label for="option_1">Option 1</label>
+                                    <input type="text" class="form-control" name="option_texts" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="option_2">Option 2</label>
+                                    <input type="text" class="form-control" name="option_texts" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="option_3">Option 3</label>
+                                    <input type="text" class="form-control" name="option_texts" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="option_4">Option 4</label>
+                                    <input type="text" class="form-control" name="option_texts" required>
+                                </div>
+                            </div>
+
+                            <h5>Correct Option</h5>
+                            <div class="form-group">
+                                <label>Choose correct option</label><br>
+                                <input type="radio" name="correct_option" value="0"> Option 1<br>
+                                <input type="radio" name="correct_option" value="1"> Option 2<br>
+                                <input type="radio" name="correct_option" value="2"> Option 3<br>
+                                <input type="radio" name="correct_option" value="3"> Option 4<br>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Add Question</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

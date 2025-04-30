@@ -1,0 +1,102 @@
+{% extends 'faculty/teacher_base.html' %}
+{% block content %}
+<div class="page-wrapper">
+    <!-- ============================================================== -->
+    <!-- Bread crumb and right sidebar toggle -->
+    <!-- ============================================================== -->
+    <div class="page-breadcrumb">
+        <div class="row">
+            <div class="col-5 align-self-center">
+                <h4 class="page-title">Take Attaendance</h4>
+            </div>
+            <div class="col-7 align-self-center">
+                <div class="d-flex align-items-center justify-content-end">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="#">Home</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Take Attendance</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-2" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+
+
+    <div class="container-fluid">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title">Take Attendance - {{ lecture.subject_name }}</h3>
+                    <p class="card-text"><strong>Semester:</strong> {{ lecture.semester }}</p>
+                    <p class="card-text"><strong>Date:</strong> {{ date|default:today }}</p>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- row -->
+        <div class="row">
+            <div class="col-12">
+                <form method="POST">
+                    {% csrf_token %}
+                <div class="card" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
+                    <div class="card-body">
+                        <h4 class="card-title"></h4>
+                        <div class="table-responsive">
+                            <table class="table">
+
+                                <thead class="{% cycle 'bg-success' 'bg-primary' 'bg-danger' 'bg-info' %} text-white">
+                                    <tr>
+                                        <th>Student Name</th>
+                                        <th>Subject</th>
+                                        <th>Semester</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for student, status in student_attendance %}
+                                    <tr>
+                                        <td>{{ student.full_name }}</td>
+                                        <td>{{ lecture.subject_name }}</td>
+                                        <td>{{ lecture.semester }}</td>
+                                        <td>{{ today }}</td>
+                                        <td>
+                                            <select name="status_{{ student.id }}" class="form-control">
+                                                <option value="Present" {% if status == "Present" %}selected{% endif %}>Present</option>
+                                                <option value="Absent" {% if status == "Absent" %}selected{% endif %}>Absent</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+
+
+                                </tbody>
+                            </table>
+                            <button type="submit" class="btn btn-info">Submit Attendance</button>
+                        </div>
+                    </div>
+                </div>
+                </form>
+            </div>
+
+        </div>
+        <!-- row -->
+
+    </div>
+
+</div>
+{% endblock %}
