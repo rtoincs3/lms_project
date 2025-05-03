@@ -1,4 +1,4 @@
-{% extends 'faculty/teacher_base.html' %}
+{% extends 'student_base.html' %}
 {% block content %}
 <div class="page-wrapper">
     <!-- ============================================================== -->
@@ -7,7 +7,7 @@
     <div class="page-breadcrumb">
         <div class="row">
             <div class="col-5 align-self-center">
-                <h4 class="page-title">Time Table</h4>
+                <h4 class="page-title">Attendance</h4>
             </div>
             <div class="col-7 align-self-center">
                 <div class="d-flex align-items-center justify-content-end">
@@ -16,7 +16,7 @@
                             <li class="breadcrumb-item">
                                 <a href="#">Home</a>
                             </li>
-                            <li class="breadcrumb-item active" aria-current="page">Time Table</li>
+                            <li class="breadcrumb-item active" aria-current="page">Attendance</li>
                         </ol>
                     </nav>
                 </div>
@@ -42,7 +42,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <h3>Attendance Records - Semester {{ semester }}</h3>
+                        <h3>Your Attendance</h3>
 
                     </div>
                 </div>
@@ -79,25 +79,28 @@
 
                     <h5>Attendance for {{ selected_date|date:"F d, Y" }}</h5>
 
+                    {% if attendance_records %}
                     <div class="table-responsive mt-3">
                         <table class="table table-bordered table-hover">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>Student</th>
                                     <th>Subject</th>
+                                    <th>Day</th>
+                                    <th>Teacher</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for record in current_records %}
+                                {% for record in attendance_records %}
                                 <tr>
-                                    <td>{{ record.student.full_name }}</td>
                                     <td>{{ record.lecture.subject_name }}</td>
+                                    <td>{{ record.lecture.day }}</td>
+                                    <td>{{ record.lecture.teacher.full_name }}</td>
+
                                     <td>
                                         <span class="badge badge-pill 
                                         {% if record.status == 'Present' %}badge-success
                                         {% elif record.status == 'Absent' %}badge-danger
-                                        {% elif record.status == 'Late' %}badge-warning
                                         {% else %}badge-secondary{% endif %}">
                                             {{ record.status }}
                                         </span>
@@ -111,6 +114,7 @@
                             </tbody>
                         </table>
                     </div>
+                    {% endif %}
                 </div>
             </div>
             {% endif %}

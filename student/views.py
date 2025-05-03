@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from users.models import CustomUser
 from .models import StudentProfile
-from faculty.models import TeacherMaterial, TimeTable
+from faculty.models import TeacherMaterial, TimeTable, Attendance
 from exam.models import Exam
 from exam.models import Question, Option, StudentExamResult, StudentExamSummary
 from django.contrib.auth import authenticate, login, logout
@@ -10,11 +10,29 @@ from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Sum
 from django.db import transaction
+from datetime import datetime
+from collections import defaultdict
 
 
 # Create your views here.
 @login_required(login_url='login')
 def student_dashboard(request):
+    student_profile = StudentProfile.objects.get(user=request.user)
+    materials = TeacherMaterial.objects.all()
+    exam_count = Exam.objects.filter(
+        department=student_profile.department,
+        samester=student_profile.samester
+    )
+
+    # calculate attendance percentage
+    attendance = Attendance.objects.filter(student=student_profile)
+    total_lectures = attendance.count()
+    present_lectures = attendance.filter(status__iexact="Present").count()
+
+    attendance_percentage = (
+        (present_lectures / total_lectures) * 100 if total_lectures else 0
+    )
+
     student_info = None
     if request.user.is_authenticated:
         try:
@@ -23,7 +41,11 @@ def student_dashboard(request):
             student_info = None
 
     
-    return render(request, "student/student_dashboard.html", {'student_info': student_info})
+    return render(request, "student/student_dashboard.html", {'student_info': student_info,
+                                                              'materials': materials,
+                                                              'exam_count':exam_count,
+                                                              'attendance_percentage': round(attendance_percentage, 1),
+                                                              'total_lecture': total_lectures})
 
 # ###########################################
 @login_required(login_url='login')
@@ -182,7 +204,7 @@ def start_exam(request, exam_id):
 
 # #################################################
 ##################################################
-
+@login_required
 def student_material(request):
     student_profile = get_object_or_404(StudentProfile, user=request.user)
     materials = TeacherMaterial.objects.filter(department=student_profile.department)
@@ -190,8 +212,9 @@ def student_material(request):
     return render(request, "student/student_material.html", {'materials': materials})
 
 
-
+@login_required
 def time_table(request):
+
     student_profile = get_object_or_404(StudentProfile, user=request.user)
     time_table = TimeTable.objects.filter(
         semester=student_profile.samester,
@@ -199,3 +222,68 @@ def time_table(request):
     ).order_by('day', 'start_time')
 
     return render(request, "student/student_timetable.html", {'time_table': time_table})
+
+
+
+@login_required
+def student_show_attendance(request):
+    student_profile = StudentProfile.objects.get(user=request.user)
+    attendance_records = Attendance.objects.filter(student=student_profile).select_related('lecture').order_by("-date")
+
+    # get unique attendace date
+    unique_dates = attendance_records.values_list('date', flat=True).distinct().order_by('date')
+
+    # handle date selection from dropdown
+    selected_date_str = request.GET.get('date')
+    selected_date_obj = None
+
+    if selected_date_str:
+        try:
+            selected_date_obj = datetime.strptime(selected_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            pass
+
+    if not selected_date_obj and unique_dates:
+        selected_date_obj = unique_dates[0]
+
+    
+    # filter records by selected date
+    if selected_date_obj:
+        filter_records = attendance_records.filter(date=selected_date_obj)
+    else:
+        filter_records = []
+
+    return render(request, "student/student_attendance.html", {'attendance_records': filter_records,
+                                                               'unique_dates': unique_dates,
+                                                               'selected_date': selected_date_obj})
+
+
+
+@login_required
+def attendance_percentage(request):
+    student_profile = StudentProfile.objects.get(user=request.user)
+    attendance_qs = Attendance.objects.filter(student=student_profile)
+
+    # Using defaultdict to collect counts
+    subject_totals = defaultdict(lambda: {'present': 0, 'total': 0})
+
+    for record in attendance_qs:
+        subject = record.lecture.subject_name
+        subject_totals[subject]['total'] += 1
+        if record.status == 'Present':
+            subject_totals[subject]['present'] += 1
+
+    # Build the final list
+    results = []
+    for subject, data in subject_totals.items():
+        total = data['total']
+        present = data['present']
+        percentage = (present / total) * 100 if total > 0 else 0
+        results.append({
+            'subject': subject,
+            'present': present,
+            'total': total,
+            'percentage': round(percentage, 2)
+        })
+
+    return render(request, "student/student_attendance_percentage.html", {'results': results})

@@ -36,14 +36,14 @@
         <!-- Sales chart -->
         <!-- ============================================================== -->
         <div class="card-group">
-            <div class="card">
+            <!-- <div class="card">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-12">
                             <div class="d-flex no-block align-items-center">
                                 <div>
                                     <i class="mdi mdi-emoticon font-20 text-muted"></i>
-                                    <p class="font-16 m-b-5">New Clients</p>
+                                    <p class="font-16 m-b-5"></p>
                                 </div>
                                 <div class="ml-auto">
                                     <h1 class="font-light text-right">23</h1>
@@ -59,7 +59,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <!-- Column -->
             <!-- Column -->
             <div class="card">
@@ -68,11 +68,11 @@
                         <div class="col-md-12">
                             <div class="d-flex no-block align-items-center">
                                 <div>
-                                    <i class="mdi mdi-image font-20  text-muted"></i>
-                                    <p class="font-16 m-b-5">New Projects</p>
+                                    <i class="fas fa-book"></i>
+                                    <p class="font-16 m-b-5">Materials</p>
                                 </div>
                                 <div class="ml-auto">
-                                    <h1 class="font-light text-right">169</h1>
+                                    <h1 class="font-light text-right">{{materials.count}}</h1>
                                 </div>
                             </div>
                         </div>
@@ -94,11 +94,11 @@
                         <div class="col-md-12">
                             <div class="d-flex no-block align-items-center">
                                 <div>
-                                    <i class="mdi mdi-currency-eur font-20 text-muted"></i>
-                                    <p class="font-16 m-b-5">New Invoices</p>
+                                    <i class="mdi mdi-book-open-page-variant font-20 text-muted"></i>
+                                    <p class="font-16 m-b-5">Available Exam</p>
                                 </div>
                                 <div class="ml-auto">
-                                    <h1 class="font-light text-right">157</h1>
+                                    <h1 class="font-light text-right">{{ exam_count.count }}</h1>
                                 </div>
                             </div>
                         </div>
@@ -113,31 +113,7 @@
                 </div>
             </div>
             <!-- Column -->
-            <!-- Column -->
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="d-flex no-block align-items-center">
-                                <div>
-                                    <i class="mdi mdi-poll font-20 text-muted"></i>
-                                    <p class="font-16 m-b-5">New Sales</p>
-                                </div>
-                                <div class="ml-auto">
-                                    <h1 class="font-light text-right">236</h1>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="progress">
-                                <div class="progress-bar bg-danger" role="progressbar"
-                                    style="width: 70%; height: 6px;" aria-valuenow="25" aria-valuemin="0"
-                                    aria-valuemax="100"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            
         </div>
         <!-- ============================================================== -->
         <!-- Sales chart -->
@@ -149,25 +125,25 @@
             <div class="col-lg-3 col-md-6">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Campaign</h4>
+                        <h4 class="card-title">Total Attendance</h4>
                         <div id="campaign" style="height: 168px; width: 100%;" class="m-t-10"></div>
                         <!-- row -->
                         <div class="row text-center text-lg-left">
                             <!-- column -->
-                            <div class="col-4">
-                                <h4 class="m-b-0 font-medium">60%</h4>
-                                <span class="text-muted">Open</span>
+                            <div class="col-6">
+                                <h4 class="m-b-0 font-medium">{{ attendance_percentage }}%</h4>
+                                <span class="text-muted">Your Attendance</span>
                             </div>
                             <!-- column -->
-                            <div class="col-4">
-                                <h4 class="m-b-0 font-medium">26%</h4>
-                                <span class="text-muted">Click</span>
+                            <div class="col-6">
+                                <h4 class="m-b-0 font-medium">{{ total_lecture }}</h4>
+                                <span class="text-muted">Total Lecture</span>
                             </div>
                             <!-- column -->
-                            <div class="col-4">
+                            <!-- <div class="col-4">
                                 <h4 class="m-b-0 font-medium">18%</h4>
                                 <span class="text-muted">Bounce</span>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -639,4 +615,8 @@
     <!-- ============================================================== -->
 </div>
  <!--  -->
+<script>
+    let attendance = {{ attendance_percentage|default:0 }};
+    let absent = 100 - attendance;
+</script>
 {% endblock %}

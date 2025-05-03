@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-k^0fpsi3bqcx2i*72xozw_hgt=qb5=2qzyd^o1uywkpzb*=8l+"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'cloudinary',
+    'cloudinary_storage',
 
     # custom apps
     "student",
@@ -135,14 +137,25 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dlfilhsgh',
+    'API_KEY': '841236413571114',
+    'API_SECRET': 'Tz7y6XKiCJHDthufKBdqVzxUiZ0'  # Replace with your actual secret
+}
+
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 # Media files (for uploaded images like profile pictures)
 MEDIA_URL = '/media/'
+# MEDIA_URL = f'https://res.cloudinary.com/dlfilhsgh/'
+
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 CSRF_TRUSTED_ORIGINS = ['https://*.up.railway.app']
-
 
 
 # Default primary key field type

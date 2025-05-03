@@ -75,10 +75,8 @@ $(function() {
         bindto: '#campaign',
         data: {
             columns: [
-                ['Un-opened', 35],
-                ['Clicked', 15],
-                ['Open', 10],
-                ['Bounced', 18],
+                ['Present', attendance],
+                ['Absent', absent],
             ],
 
             type: 'donut',

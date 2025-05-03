@@ -407,11 +407,6 @@ def attendance_timetable(request):
     return render(request, "faculty/teacher_attendance_timetable.html", {'time_table': time_table,
                                                                          'now': timezone.localtime().now()})
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from datetime import date
-from .models import TimeTable, StudentProfile, Attendance
 
 @login_required
 def take_attendance(request, lecture_id):
@@ -451,52 +446,49 @@ def take_attendance(request, lecture_id):
         'today': today
     })
 
+
 @login_required
 def attendance_semester_list(request):
     teacher = request.user
     semesters = TimeTable.objects.filter(teacher__user=teacher).values_list('semester', flat=True).distinct()
     return render(request, "faculty/attendance_semester_list.html", {'semesters': semesters})
+
 @login_required
 def attendance_by_semester(request, semester):
     teacher = request.user
-    
+
     # Get all records for this semester and teacher
     attendance_records = Attendance.objects.filter(
         lecture__teacher__user=teacher,
         lecture__semester=semester
     ).select_related('student', 'lecture').order_by('date', 'student__full_name')
-    
-    # Get unique dates 
+
+    # Get unique attendance dates
     unique_dates = attendance_records.values_list('date', flat=True).distinct().order_by('date')
-    
-    # Selected date (default to first date if not specified)
-    selected_date = request.GET.get('date')
-    
-    # If a date was selected, try to use it
-    if selected_date:
+
+    selected_date_str = request.GET.get('date')  # From ?date=YYYY-MM-DD
+    selected_date_obj = None
+
+    # Try to parse selected date string into a date object
+    if selected_date_str:
         try:
-            # If date is in YYYY-MM-DD format already, use it
-            import datetime
-            # Try to parse the date - this will work if it's already in YYYY-MM-DD format
-            selected_date_obj = datetime.datetime.strptime(selected_date, '%Y-%m-%d').date()
-            current_records = attendance_records.filter(date=selected_date_obj)
+            selected_date_obj = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
         except ValueError:
-            # If parsing fails, default to the first date
-            if unique_dates:
-                selected_date = unique_dates[0]
-                current_records = attendance_records.filter(date=selected_date)
-            else:
-                current_records = []
-    # No date selected, default to first date
-    elif unique_dates:
-        selected_date = unique_dates[0]
-        current_records = attendance_records.filter(date=selected_date)
+            pass
+
+    # Fallback to first date if parsing fails or no date selected
+    if not selected_date_obj and unique_dates:
+        selected_date_obj = unique_dates[0]
+
+    # Filter records for the selected date
+    if selected_date_obj:
+        current_records = attendance_records.filter(date=selected_date_obj)
     else:
         current_records = []
-    
+
     return render(request, "faculty/show_attendance.html", {
         'unique_dates': unique_dates,
-        'selected_date': selected_date,
+        'selected_date': selected_date_obj,  # ✅ date object, not string
         'current_records': current_records,
         'semester': semester,
     })

@@ -1,4 +1,4 @@
-{% extends 'faculty/teacher_base.html' %}
+{% extends 'student_base.html' %}
 {% block content %}
 <div class="page-wrapper">
     <!-- ============================================================== -->
@@ -7,7 +7,7 @@
     <div class="page-breadcrumb">
         <div class="row">
             <div class="col-5 align-self-center">
-                <h4 class="page-title">Time Table</h4>
+                <h4 class="page-title">Attendance Percentage</h4>
             </div>
             <div class="col-7 align-self-center">
                 <div class="d-flex align-items-center justify-content-end">
@@ -16,7 +16,7 @@
                             <li class="breadcrumb-item">
                                 <a href="#">Home</a>
                             </li>
-                            <li class="breadcrumb-item active" aria-current="page">Time Table</li>
+                            <li class="breadcrumb-item active" aria-current="page">Attendance Percentage</li>
                         </ol>
                     </nav>
                 </div>
@@ -42,7 +42,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <h3>Attendance Records - Semester {{ semester }}</h3>
+                        <h3>Your Attendance Percentage</h3>
 
                     </div>
                 </div>
@@ -53,59 +53,29 @@
         <!-- row -->
         <div class="row">
             <div class="col-12">
-            {% if not unique_dates %}
-            <div class="alert alert-warning">
-                No attendance records found for this semester.
-            </div>
-            {% else %}
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">Date Selection</h5>
                 </div>
                 <div class="card-body">
-                    <form method="get" class="mb-3">
-                        <div class="form-group">
-                            <label for="dateSelect">Select Date:</label>
-                            <select id="dateSelect" name="date" class="form-control" onchange="this.form.submit()">
-                                {% for date in unique_dates %}
-                                <option value="{{ date|date:'Y-m-d' }}" {% if date == selected_date %}selected{% endif %}>
-
-                                    {{ date|date:"F d, Y" }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </form>
-
-                    <h5>Attendance for {{ selected_date|date:"F d, Y" }}</h5>
-
+                    
                     <div class="table-responsive mt-3">
                         <table class="table table-bordered table-hover">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>Student</th>
                                     <th>Subject</th>
-                                    <th>Status</th>
+                                    <th>Present in Lecture</th>
+                                    <th>Total Lecture</th>
+                                    <th>Percentage</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for record in current_records %}
+                                {% for result in results %}
                                 <tr>
-                                    <td>{{ record.student.full_name }}</td>
-                                    <td>{{ record.lecture.subject_name }}</td>
-                                    <td>
-                                        <span class="badge badge-pill 
-                                        {% if record.status == 'Present' %}badge-success
-                                        {% elif record.status == 'Absent' %}badge-danger
-                                        {% elif record.status == 'Late' %}badge-warning
-                                        {% else %}badge-secondary{% endif %}">
-                                            {{ record.status }}
-                                        </span>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="3" class="text-center">No attendance records for this date.</td>
+                                    <td>{{ result.subject }}</td>
+                                    <td>{{ result.present }}</td>
+                                    <td>{{ result.total }}</td>
+                                    <td>{{ result.percentage }}%</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -113,7 +83,6 @@
                     </div>
                 </div>
             </div>
-            {% endif %}
             </div>
 
         </div>

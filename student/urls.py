@@ -11,4 +11,6 @@ urlpatterns = [
     path("start-exam/<int:exam_id>", views.start_exam, name="start_exam"),
     path("student_material/", views.student_material, name="student_material"),
     path("time-table/", views.time_table, name="time_table"),
+    path("show-attendance/", views.student_show_attendance, name="student_show_attendance"),
+    path("attendance-percentage/", views.attendance_percentage, name="attendance_percentage"),
 ]
