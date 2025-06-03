@@ -81,7 +81,7 @@
                                         <td>{{ material.title }}</td>
                                         <td>{{ material.teacher.full_name }} - {{material.teacher.teacher_roleww}}</td>
                                         <td>{{material.upload_at}}</td>
-                                        <td><a href="{% url 'delete_material' material.id %}"><i class="fas fa-trash text-danger ml-3" style="font-size: 17px;"></i></a></td>
+                                        <td><a href="{% url 'faculty:delete_material' material.id %}"><i class="fas fa-trash text-danger ml-3" style="font-size: 17px;"></i></a></td>
                                     </tr>
                                 {% endfor %}
 

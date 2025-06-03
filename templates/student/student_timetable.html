@@ -40,37 +40,35 @@
         <!-- row -->
         <div class="row">
             <div class="col-12">
-
-                {% regroup time_table by day as day_list %}
                 
-                {% for day in day_list %}
+                {% for day, day_data in grouped_timetable.items %}
                 <div class="card" style="box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;">
                     <div class="card-body">
-                        <h4 class="card-title">{{ day.grouper }}</h4>
+                        <h4 class="card-title">{{ day }} - {{ day_data.date|date:"d M, Y" }}</h4>
                         <div class="table-responsive">
                             <table class="table">
                                 
-                                <thead class="{% cycle 'bg-success' 'bg-primary' 'bg-danger' 'bg-info' %} text-white">
+                                <thead class="{% cycle 'bg-success' 'bg-primary' 'bg-danger' 'bg-info' 'bg-warning' 'bg-secondary' %} text-white">
                                     <tr>
                                         <th>Subject</th>
                                         <th>Teacher</th>
-                                         <th>Start Time</th>
+                                        <th>Start Time</th>
                                         <th>End Time</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for lecture in day.list %}
+                                    {% for lecture in day_data.lectures %}
                                     <tr>
                                         <td>{{ lecture.subject_name }}</td>
                                         <td>{{ lecture.teacher.full_name }}</td>
                                         <td>{{ lecture.start_time|time:"h:i A" }}</td>
                                         <td>{{ lecture.end_time|time:"h:i A" }}</td>
-
-                                        
                                     </tr>
-                                {% endfor %}
-
-                                    
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">No classes scheduled</td>
+                                    </tr>
+                                    {% endfor %}
                                 </tbody>
                             </table>
                         </div>

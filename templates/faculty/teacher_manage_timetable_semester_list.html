@@ -43,7 +43,7 @@
                         <h3 class="card-title">Semester - {{ sem }}</h3>
 
 
-                        <a href="{% url 'manage_timetable_semester' sem %}"
+                        <a href="{% url 'faculty:manage_timetable_semester' sem %}"
                             class="btn {% cycle 'btn-success' 'btn-primary' 'btn-danger' 'btn-info' %}">
                             Manage TimeTable
                         </a>

@@ -1,8 +1,10 @@
 # exams/admin.py
 
 from django.contrib import admin
-from .models import Exam, Question, Option, StudentExamResult, StudentExamSummary
+from .models import Exam, Question, Option, StudentExamResult, StudentExamSummary, Notification
 from django import forms
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 
 class ExamForm(forms.ModelForm):
@@ -91,8 +93,6 @@ class StudentExamResultAdmin(admin.ModelAdmin):
 
 
 
-from django.utils.html import format_html
-from django.utils.safestring import mark_safe
 
 class StudentExamSummaryAdmin(admin.ModelAdmin):
     list_display = ['student', 'exam', 'total_marks', 'total_questions']
@@ -138,6 +138,12 @@ class StudentExamSummaryAdmin(admin.ModelAdmin):
     exam_details.short_description = "Question-wise Details"
 
 
+
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ['title', 'description', 'created_at']
+
+
 admin.site.register(Exam, ExamAdmin)
 admin.site.register(StudentExamResult, StudentExamResultAdmin)
 admin.site.register(StudentExamSummary, StudentExamSummaryAdmin)
+admin.site.register(Notification, NotificationAdmin)

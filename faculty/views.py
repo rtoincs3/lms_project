@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from users.models import CustomUser
 from django.contrib.auth.decorators import login_required
 from .models import TeacherProfile, TeacherMaterial, TimeTable, Attendance
-from exam.models import Exam, Question, Option
+from exam.models import Exam, Question, Option, Notification
 from student.models import StudentProfile
 from django.http import Http404
 from django.contrib import messages
@@ -23,7 +23,10 @@ def teacher_dashboard(request):
             teacher_info = TeacherProfile.objects.get(user=request.user)
         except TeacherProfile.DoesNotExist:
             teacher_info = None
-    return render(request, "faculty/teacher_dashboard.html", {'teacher_info': teacher_info})
+    
+    notifications = Notification.objects.filter(target_user__in=['faculty', 'both']).order_by('-created_at')
+    return render(request, "faculty/teacher_dashboard.html", {'teacher_info': teacher_info,
+                                                              'notifications': notifications})
 
 @login_required
 def teacher_profile(request):
@@ -57,7 +60,7 @@ def teacher_login(request):
             user = authenticate(request, username=user.username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect("teacher_dashboard")
+                return redirect("faculty:teacher_dashboard")
             else:
                 return render(request,"faculty/teacher_login.html")
         else:
@@ -68,7 +71,7 @@ def teacher_login(request):
 def teacher_logout(request):
 
     logout(request)
-    return redirect("teacher_login")
+    return redirect("faculty:teacher_login")
 
 
 @login_required
@@ -98,7 +101,7 @@ def create_exam(request):
 
         )
 
-        return redirect('add_question', exam_id=exam.id)
+        return redirect('faculty:add_question', exam_id=exam.id)
 
 
 
@@ -141,7 +144,7 @@ def add_question(request, exam_id):
                 is_correct=is_correct
             )
 
-            return redirect('add_question', exam_id=exam.id)
+            return redirect('faculty:add_question', exam_id=exam.id)
         
         
 
@@ -205,7 +208,7 @@ def update_question(request, question_id):
         except Exception as e:
             messages.error(request, "Error Occured {e}")
     
-    return redirect("update_exam", exam_id=question.exam_id)
+    return redirect("faculty:update_exam", exam_id=question.exam_id)
 
 
 
@@ -221,11 +224,11 @@ def add_question(request, exam_id):
 
         if not options or len(options) < 2:
             messages.error(request, "Please provide at least two options.")
-            return redirect("update_exam", exam_id=exam.id)
+            return redirect("faculty:update_exam", exam_id=exam.id)
 
         if correct_index is None:
             messages.error(request, "Please select the correct option.")
-            return redirect("update_exam", exam_id=exam.id)
+            return redirect("faculty:update_exam", exam_id=exam.id)
 
         correct_index = int(correct_index)
 
@@ -243,9 +246,9 @@ def add_question(request, exam_id):
             )
 
         messages.success(request, "Question Added Successfully")
-        return redirect("update_exam", exam_id=exam.id)
+        return redirect("faculty:update_exam", exam_id=exam.id)
 
-    return redirect("update_exam", exam_id=exam.id)
+    return redirect("faculty:update_exam", exam_id=exam.id)
 
 @login_required
 def delete_question(request, exam_id, question_id):
@@ -264,13 +267,13 @@ def delete_question(request, exam_id, question_id):
     # Check if the current user is the teacher of the exam
     if exam.teacher.user != request.user:  # Compare user IDs
         messages.error(request, "You don't have permission to delete this question")
-        return redirect("update_exam", exam_id=exam.id)
+        return redirect("faculty:update_exam", exam_id=exam.id)
 
     # Delete the question and all related options (because of on_delete=models.CASCADE)
     question.delete()
 
     messages.success(request, "Question deleted successfully")
-    return redirect("update_exam", exam_id=exam.id)
+    return redirect("faculty:update_exam", exam_id=exam.id)
 
 
 @login_required
@@ -292,7 +295,7 @@ def manage_material(request):
             )
 
             messages.success(request, "Material Create Succesfully")
-            return redirect("manage_material")
+            return redirect("faculty:manage_material")
 
     return render(request, "faculty/teacher_manage_materials.html", {'materials': materials})
 
@@ -304,12 +307,12 @@ def delete_material(request, material_id):
     # check if current user is a teacher of this material
     if material.teacher.user != request.user:   # compare user IDs
         messages.error(request, "You don't have permission to delete this question")
-        return redirect("manage_material")
+        return redirect("faculty:manage_material")
     
     # delete 
     material.delete()
     messages.success(request, "Material deleted successfully")
-    return redirect("manage_material")
+    return redirect("faculty:manage_material")
 
 
 
@@ -320,7 +323,7 @@ def manage_timetable_semester_list(request):
     teacher = get_object_or_404(TeacherProfile, user=request.user)
 
     if teacher.teacher_role not in ["Principal", "hod"]:
-        return redirect("show_timetable")
+        return redirect("faculty:show_timetable")
     
     semester = TimeTable.objects.filter(department=teacher.department).values_list('semester', flat=True).distinct()
 
@@ -340,7 +343,7 @@ def manage_timetable_by_semester(request, semester):
     # Ensure the semester is a valid value before continuing
     if not semester:
         messages.error(request, "Invalid semester provided!")
-        return redirect("manage_timetable_semester_list")
+        return redirect("faculty:manage_timetable_semester_list")
 
     if request.method == "POST":
         timetable = TimeTable.objects.filter(semester=semester, teacher__department=department).order_by('day', 'start_time')
@@ -374,7 +377,7 @@ def manage_timetable_by_semester(request, semester):
             )
 
         messages.success(request, "Your Time Table updated successfully!")
-        return redirect("manage_timetable_semester", semester=semester)
+        return redirect("faculty:manage_timetable_semester", semester=semester)
 
     # After POST or normal GET request
     timetable = TimeTable.objects.filter(semester=semester, teacher__department=department).order_by('day', 'start_time')
@@ -384,15 +387,53 @@ def manage_timetable_by_semester(request, semester):
                                                                      'teachers': teachers, 
                                                                      'user_role': user_role,
                                                                      'days_of_week': days_of_week})
+from datetime import date, timedelta
+from collections import defaultdict
+import calendar
 
 @login_required
 def show_timetable(request):
-
     teacher_profile = get_object_or_404(TeacherProfile, user=request.user)
 
+    # Get today's date and current weekday index (Monday=0)
+    today = date.today()
+    weekday_index = today.weekday()
+
+    # Map days of the week to their index for alignment
+    day_name_to_index = {day: i for i, day in enumerate(calendar.day_name)}
+
+    # Get timetable and sort by weekday order
     time_table = TimeTable.objects.filter(teacher=teacher_profile).order_by('day', 'start_time')
 
-    return render(request, "faculty/teacher_show_timetable.html", {'time_table': time_table})
+    # Group timetable by day
+    daywise_timetable = defaultdict(list)
+    for entry in time_table:
+        daywise_timetable[entry.day].append(entry)
+
+    # Generate upcoming weekday dates starting from today
+    day_to_date = {}
+    for i in range(7):  # upcoming 7 days
+        current_day = today + timedelta(days=i)
+        day_name = current_day.strftime("%A")
+        if day_name not in day_to_date:
+            day_to_date[day_name] = current_day
+
+    # Annotate timetable entries with computed dates
+    timetable_with_dates = []
+    for day, entries in daywise_timetable.items():
+        matching_date = day_to_date.get(day)
+        timetable_with_dates.append({
+            'day': day,
+            'date': matching_date,
+            'entries': entries
+        })
+
+    # Sort final timetable by date
+    timetable_with_dates.sort(key=lambda x: x['date'])
+
+    return render(request, "faculty/teacher_show_timetable.html", {
+        'timetable_with_dates': timetable_with_dates
+    })
 
 
 
@@ -432,7 +473,7 @@ def take_attendance(request, lecture_id):
                 attendance.status = status
                 attendance.save()
         messages.success(request, "Attendance submitted successfully.")
-        return redirect("attendance_timetable")  # adjust this URL name as needed
+        return redirect("faculty:attendance_timetable")  # adjust this URL name as needed
 
     # Prepare list of tuples (student, status)
     for student in students:

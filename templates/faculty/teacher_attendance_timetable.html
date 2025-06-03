@@ -69,7 +69,7 @@
                                         <td>{{ lecture.start_time|time:"h:i A" }}</td>
                                         <td>{{ lecture.end_time|time:"h:i A" }}</td>
                                      
-                                        <td><a href="{% url 'take_attendance' lecture.id %}"
+                                        <td><a href="{% url 'faculty:take_attendance' lecture.id %}"
                                                 class="text-white btn btn-secondary">
                                             Take Attendance
                                             </a>

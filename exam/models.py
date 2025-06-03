@@ -95,3 +95,23 @@ class StudentExamSummary(models.Model):
     class Meta:
         verbose_name = 'Student Exam Summary'
         verbose_name_plural = 'Student Exam Summaries'
+
+
+
+# ##################################################
+##################################################
+TARGET_CHOICES = [
+    ('student', 'Student'),
+    ('faculty', 'Faculty'),
+    ('both', 'Both')
+    ]
+
+class Notification(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    target_user = models.CharField(max_length=10, choices=TARGET_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+    def __str__(self):
+        return self.title

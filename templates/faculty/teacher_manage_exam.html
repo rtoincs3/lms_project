@@ -37,7 +37,7 @@
                     <div class="card-body">
                         <h3 class="card-title">{{ exam.title }}</h3>
                         <p class="card-text">{{ exam.description }}</p>
-                        <a href="{% url 'update_exam' exam.id %}" class="btn {% cycle 'btn-success' 'btn-primary' 'btn-danger' 'btn-info' %}">Manage Exam</a>
+                        <a href="{% url 'faculty:faculty:update_exam' exam.id %}" class="btn {% cycle 'btn-success' 'btn-primary' 'btn-danger' 'btn-info' %}">Manage Exam</a>
                     </div>
                 </div>
             </div>

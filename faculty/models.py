@@ -98,6 +98,7 @@ class TimeTable(models.Model):
     semester = models.IntegerField()
     subject_name = models.CharField(max_length=100)
     day = models.CharField(max_length=10, choices=DAYS_OF_WEEK)
+    date = models.DateField(null=True, blank=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
 

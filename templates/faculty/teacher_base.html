@@ -218,7 +218,7 @@
                             <a class="nav-link dropdown-toggle waves-effect waves-dark" href="" data-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false">
                                 <i class="mdi mdi-bell-outline font-22"></i>
-                                <span class="badge badge-pill badge-info noti">3</span>
+                                <span class="badge badge-pill badge-info noti">{{notifications|length}}</span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right mailbox animated bounceInDown">
                                 <span class="with-arrow">
@@ -227,57 +227,24 @@
                                 <ul class="list-style-none">
                                     <li>
                                         <div class="drop-title bg-primary text-white">
-                                            <h4 class="m-b-0 m-t-5">4 New</h4>
+                                            <h4 class="m-b-0 m-t-5">{{ notifications|length }} New</h4>
                                             <span class="font-light">Notifications</span>
                                         </div>
                                     </li>
                                     <li>
                                         <div class="message-center notifications">
                                             <!-- Message -->
+                                             {% for notification in notifications %}
                                             <a href="javascript:void(0)" class="message-item">
-                                                <span class="btn btn-danger btn-circle">
-                                                    <i class="fa fa-link"></i>
-                                                </span>
+                                               
                                                 <div class="mail-contnet">
-                                                    <h5 class="message-title">Luanch Admin</h5>
-                                                    <span class="mail-desc">Just see the my new admin!</span>
-                                                    <span class="time">9:30 AM</span>
+                                                    <h5 class="message-title">{{ notification.title }}</h5>
+                                                    <span class="mail-desc">{{notification.description}} </span>
+                                                    <span class="time">{{ notification.created_at }}</span>
                                                 </div>
                                             </a>
-                                            <!-- Message -->
-                                            <a href="javascript:void(0)" class="message-item">
-                                                <span class="btn btn-success btn-circle">
-                                                    <i class="ti-calendar"></i>
-                                                </span>
-                                                <div class="mail-contnet">
-                                                    <h5 class="message-title">Event today</h5>
-                                                    <span class="mail-desc">Just a reminder that you have event</span>
-                                                    <span class="time">9:10 AM</span>
-                                                </div>
-                                            </a>
-                                            <!-- Message -->
-                                            <a href="javascript:void(0)" class="message-item">
-                                                <span class="btn btn-info btn-circle">
-                                                    <i class="ti-settings"></i>
-                                                </span>
-                                                <div class="mail-contnet">
-                                                    <h5 class="message-title">Settings</h5>
-                                                    <span class="mail-desc">You can customize this template as you
-                                                        want</span>
-                                                    <span class="time">9:08 AM</span>
-                                                </div>
-                                            </a>
-                                            <!-- Message -->
-                                            <a href="javascript:void(0)" class="message-item">
-                                                <span class="btn btn-primary btn-circle">
-                                                    <i class="ti-user"></i>
-                                                </span>
-                                                <div class="mail-contnet">
-                                                    <h5 class="message-title">Pavan kumar</h5>
-                                                    <span class="mail-desc">Just see the my admin!</span>
-                                                    <span class="time">9:02 AM</span>
-                                                </div>
-                                            </a>
+                                            {% endfor %}
+                                            
                                         </div>
                                     </li>
                                     <li>
@@ -318,12 +285,12 @@
                                     </div>
                                 </div>
                                 <div class="profile-dis scrollable">
-                                    <a class="dropdown-item" href="{% url 'teacher_profile' %}">
+                                    <a class="dropdown-item" href="{% url 'faculty:teacher_profile' %}">
                                         <i class="ti-user m-r-5 m-l-5"></i> My Profile</a>
                                     <!-- <a class="dropdown-item" href="javascript:void(0)">
                                         <i class="ti-wallet m-r-5 m-l-5"></i> My Balance</a> -->
                                    
-                                    <a class="dropdown-item" href="{% url 'teacher_logout' %}">
+                                    <a class="dropdown-item" href="{% url 'faculty:teacher_logout' %}">
                                         <i class="fa fa-power-off m-r-5 m-l-5"></i> Logout</a>
                                     <div class="dropdown-divider"></div>
                                 </div>
@@ -377,13 +344,13 @@
                             </a>
                             <ul aria-expanded="false" class="collapse  first-level">
                                 <li class="sidebar-item">
-                                    <a href="{% url 'create_exam' %}" class="sidebar-link">
+                                    <a href="{% url 'faculty:create_exam' %}" class="sidebar-link">
                                         <i class="mdi mdi-email"></i>
                                         <span class="hide-menu"> Create Exam </span>
                                     </a>
                                 </li>
                                 <li class="sidebar-item">
-                                    <a href="{% url 'manage_exam' %}" class="sidebar-link">
+                                    <a href="{% url 'faculty:manage_exam' %}" class="sidebar-link">
                                         <i class="mdi mdi-email"></i>
                                         <span class="hide-menu"> Manage Exam </span>
                                     </a>
@@ -400,7 +367,7 @@
                             </a>
                             <ul aria-expanded="false" class="collapse  first-level">
                                 <li class="sidebar-item">
-                                    <a href="{% url 'manage_material' %}" class="sidebar-link">
+                                    <a href="{% url 'faculty:manage_material' %}" class="sidebar-link">
                                         <i class="fas fa-file-alt"></i>
                                         <span class="hide-menu"> Manage Materials </span>
                                     </a>
@@ -417,14 +384,14 @@
                             <ul aria-expanded="false" class="collapse first-level">
                                 {% if teacher.teacher_role == "Principal" or teacher.teacher_role == "hod" %}
                                 <li class="sidebar-item">
-                                    <a href="{% url 'manage_timetable' %}" class="sidebar-link">
+                                    <a href="{% url 'faculty:manage_timetable' %}" class="sidebar-link">
                                         <i class="mdi mdi-account-key"></i>
                                         <span class="hide-menu"> Manage TimeTable </span>
                                     </a>
                                 </li>
                                 {% else %}
                                 <li class="sidebar-item">
-                                    <a href="{% url 'show_timetable' %}" class="sidebar-link">
+                                    <a href="{% url 'faculty:show_timetable' %}" class="sidebar-link">
                                         <i class="mdi mdi-account-key"></i>
                                         <span class="hide-menu"> Show TimeTable </span>
                                     </a>
@@ -441,13 +408,13 @@
                             </a>
                             <ul aria-expanded="false" class="collapse first-level">
                                 <li class="sidebar-item">
-                                    <a href="{% url 'attendance_timetable' %}" class="sidebar-link">
+                                    <a href="{% url 'faculty:attendance_timetable' %}" class="sidebar-link">
                                         <i class="mdi mdi-account-box"></i>
                                         <span class="hide-menu">Take Attendance</span>
                                     </a>
                                 </li>
                                 <li class="sidebar-item">
-                                    <a href="{% url 'attendance_semester_list' %}" class="sidebar-link">
+                                    <a href="{% url 'faculty:attendance_semester_list' %}" class="sidebar-link">
                                         <i class="mdi mdi-account-box"></i>
                                         <span class="hide-menu">Show Attendance</span>
                                     </a>

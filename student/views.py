@@ -3,7 +3,7 @@ from users.models import CustomUser
 from .models import StudentProfile
 from faculty.models import TeacherMaterial, TimeTable, Attendance
 from exam.models import Exam
-from exam.models import Question, Option, StudentExamResult, StudentExamSummary
+from exam.models import Question, Option, StudentExamResult, StudentExamSummary, Notification
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -40,12 +40,30 @@ def student_dashboard(request):
         except StudentProfile.DoesNotExist:
             student_info = None
 
+
+     # Get today's timetable
+    today = datetime.now().date()
+    day_name = today.strftime('%A')  # Get the current day name (Monday, Tuesday, etc.)
+    
+    # Get timetable for today
+    today_timetable = TimeTable.objects.filter(
+        semester=student_profile.samester,
+        department=student_profile.department,
+        day=day_name
+    ).order_by('start_time')
+
+    #  Notifications
+    notifications = Notification.objects.filter(target_user__in=['student', 'both']).order_by('-created_at')
     
     return render(request, "student/student_dashboard.html", {'student_info': student_info,
                                                               'materials': materials,
                                                               'exam_count':exam_count,
                                                               'attendance_percentage': round(attendance_percentage, 1),
-                                                              'total_lecture': total_lectures})
+                                                              'total_lecture': total_lectures,
+                                                              'notifications': notifications,
+                                                              'today_timetable': today_timetable,
+                                                              'today_date': today,
+                                                              'day_name': day_name})
 
 # ###########################################
 @login_required(login_url='login')
@@ -79,7 +97,7 @@ def student_login(request):
             user = authenticate(request, username=user.username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('student_dashboard')
+                return redirect('student:student_dashboard')
             else:
                 return render(request, 'student/student_login.html')
         else:
@@ -92,7 +110,7 @@ def student_login(request):
 def user_logout(request):
 
     logout(request)
-    return redirect('login')  # after logout, redirect to login page
+    return redirect('student:login')  # after logout, redirect to login page
 
 
 @login_required
@@ -130,7 +148,7 @@ def start_exam(request, exam_id):
 
     current_time = timezone.now()
     if current_time < exam.start_time or current_time > exam.end_time:
-        return redirect("available_exams")
+        return redirect("student:available_exams")
 
     # Check if the exam time has started
     session_key = f"exam_start_time_{exam.id}_{student.id}"
@@ -193,7 +211,7 @@ def start_exam(request, exam_id):
         # summary.save()
 
         messages.success(request, f"Exam submitted successfully! Your total marks: {total_marks}")
-        return redirect('available_exams')
+        return redirect('student:available_exams')
 
     # Passing remaining time to the template
     return render(request, "student/student_start_exam.html", {'exam': exam, 
@@ -214,15 +232,45 @@ def student_material(request):
 
 @login_required
 def time_table(request):
-
+    from datetime import datetime, timedelta
+    import calendar
+    
+    # Get the current date
+    today = datetime.now().date()
+    
+    # Get the current day of the week (0 is Monday, 6 is Sunday)
+    current_weekday = today.weekday()
+    
+    # Calculate the date of Monday of this week
+    monday_date = today - timedelta(days=current_weekday)
+    
+    # Create a dictionary mapping day names to their dates for this week
+    week_dates = {}
+    day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+    
+    for i, day in enumerate(day_names):
+        date = monday_date + timedelta(days=i)
+        week_dates[day] = date
+    
     student_profile = get_object_or_404(StudentProfile, user=request.user)
     time_table = TimeTable.objects.filter(
         semester=student_profile.samester,
         department=student_profile.department
     ).order_by('day', 'start_time')
-
-    return render(request, "student/student_timetable.html", {'time_table': time_table})
-
+    
+    # Group the timetable by day
+    grouped_timetable = {}
+    for day in day_names:
+        day_timetable = time_table.filter(day=day)
+        grouped_timetable[day] = {
+            'lectures': day_timetable,
+            'date': week_dates[day]
+        }
+    
+    return render(request, "student/student_timetable.html", {
+        'grouped_timetable': grouped_timetable,
+        'week_dates': week_dates
+    })
 
 
 @login_required
